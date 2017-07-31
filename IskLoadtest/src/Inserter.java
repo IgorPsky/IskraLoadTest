@@ -1,27 +1,19 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Random;
 
-public class Inserter implements Runnable {
+public class Inserter extends Runner implements Runnable {
 	Connection conn;
 	PreparedStatement stmt = null;
 	
 	String insertSql = "insert into cdr(call_date, number_from, number_to, duration, comment) values (now(), ?, ?, ?, ?)";
 	
 	private static int insertersCount = 0;
-	private static boolean isGlobalStop = false;
-	
-	public static void GlobalStop() {
-		isGlobalStop = true;
-	}
-
-	public static void GlobalStopReset() {
-		isGlobalStop = false;
-	}
 
 	private String dbUrl = "";
-	
-	private boolean isStop = false;
 	
 	private int inserterNo;
 	
@@ -34,20 +26,16 @@ public class Inserter implements Runnable {
     public Inserter(String connectString, String user, String pass) throws SQLException {
 		super();	
 		dbUrl = connectString;
-		isStop = false;
 		conn = DriverManager.getConnection(dbUrl, user, pass);
 		inserterNo = ++insertersCount;
 	}
     
-    public void Stop() {
-    	isStop=true;
-    }
 
 	@Override
 	public void run() {
 		try {
 			stmt = conn.prepareStatement(insertSql);
-			while(!isStop&&!isGlobalStop){
+			while(!isStop()){
 				Thread.yield();
 				stmt.setString(1,getRandomNumber());
 				stmt.setString(2,getRandomNumber());
@@ -57,10 +45,8 @@ public class Inserter implements Runnable {
 				// conn.commit();
 			}
 		} catch (SQLException e) {
-			isStop = true;
+			Stop();
 			e.printStackTrace();
 		} 
 	}
-
-
 }

@@ -5,7 +5,7 @@ public class Ldtest {
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
 	// static final String DB_URL = "jdbc:mysql://192.168.5.91,192.168.5.92,192.168.5.93?secondsBeforeRetryMaster=16";
 	
-	static final String DB_URL = "jdbc:mysql://192.168.5.91:3306/apigw";
+	static final String DB_URL = "jdbc:mysql://192.168.5.91:3306/ldtest";
 	
 	
 	public static void loadTest(int insertersCount) throws SQLException, ClassNotFoundException {
@@ -15,8 +15,11 @@ public class Ldtest {
 			Thread tIns = new Thread(ins);
 			tIns.start();
 		}
+		Deleter del = new Deleter(DB_URL, "iskratel", "iskratel");
+		Thread tDel = new Thread(del);
+		tDel.start();
 		try {
-			Thread.sleep(10000);
+			Thread.sleep(60000*10);
 			Inserter.GlobalStop();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
